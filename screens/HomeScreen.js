@@ -6,7 +6,7 @@ import { CustomTextInput } from "../components/CustomInputs";
 import { collection, addDoc, getDocs, query, where, updateDoc, doc, deleteDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native'; // <-- adicione useRoute
 import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen () {
@@ -18,13 +18,23 @@ export default function HomeScreen () {
     const [editId, setEditId] = useState(null);
 
     const navigation = useNavigation();
-
+    const route = useRoute();
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
         });
         return unsubscribe;
     }, []);
+    useEffect(() => {
+        if (route.params && route.params.editItem) {
+            const { valor, descricao, data, id } = route.params.editItem;
+            setValor(String(valor));
+            setDescricao(descricao);
+            setData(data);
+            setEditId(id);            
+            navigation.setParams({ editItem: undefined });
+        }
+    }, [route.params]);
 
     const loadRecords = async () => {
         if (!user) return;
@@ -178,7 +188,6 @@ export default function HomeScreen () {
         </SafeAreaView>
     )
 }
-
 const styles = StyleSheet.create({
     headerWrapper: {
         backgroundColor: '#f5f6fa',

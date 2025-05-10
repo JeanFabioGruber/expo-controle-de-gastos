@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, View, Text, StyleSheet } from 'react-native';
 import { auth, signOut, db } from '../firebase';
-import { DangerButton } from '../components/Buttons';
+import { DangerButton, SecondaryButton } from '../components/Buttons';
 import { doc, getDoc } from 'firebase/firestore';
 
 export default function MinhaContaScreen({ navigation }) {
@@ -42,6 +42,7 @@ export default function MinhaContaScreen({ navigation }) {
                 <Text style={styles.label}>E-mail:</Text>
                 <Text style={styles.value}>{user.email}</Text>
                 <DangerButton text="Desconectar" action={logout} />
+                <SecondaryButton text="Voltar" action={() => navigation.goBack()} />
             </View>
         </SafeAreaView>
     );

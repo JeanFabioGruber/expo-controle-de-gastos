@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, Text, StyleSheet, View, SectionList, ActivityIndicator } from "react-native";
 import { db } from '../firebase';
-import { SecondaryButton, DangerButton } from "../components/Buttons";
+import { SecondaryButton, DangerButton, PrimaryButton } from "../components/Buttons";
 import { collection, getDocs, query, where, doc, deleteDoc } from "firebase/firestore";
 import { auth } from "../firebase";
 import { useNavigation } from '@react-navigation/native';
@@ -25,23 +25,18 @@ export default function GastosScreen() {
         const records = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data()
-        }));
-
-        // Agrupa por data (YYYY-MM-DD)
+        }));       
         const grouped = {};
         records.forEach(item => {
             const date = item.data;
             if (!grouped[date]) grouped[date] = [];
             grouped[date].push(item);
-        });
-
-        // Ordena as datas (decrescente) e os itens de cada data
+        });       
         const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
         const sectionsData = sortedDates.map(date => ({
             title: date,
             data: grouped[date].sort((a, b) => b.valor - a.valor)
         }));
-
         setSections(sectionsData);
         setLoading(false);
     };
@@ -54,6 +49,9 @@ export default function GastosScreen() {
         await deleteDoc(doc(db, 'records', id));
         loadRecords();
     };
+    const edit = (item) => {
+        navigation.navigate('Home', { editItem: item });
+    };
 
     const renderItem = ({ item }) => (
         <View style={styles.itemContainer}>
@@ -61,7 +59,10 @@ export default function GastosScreen() {
                 <Text style={styles.itemDescricao}>{item.descricao}</Text>
                 <Text style={styles.itemValor}>R$ {item.valor}</Text>
             </View>
-            <DangerButton text="Excluir" action={() => remove(item.id)} />
+            <View style={styles.itemButtons}>
+                <PrimaryButton text="Editar" action={() => edit(item)} />
+                <DangerButton text="Excluir" action={() => remove(item.id)} />
+            </View>
         </View>
     );
 
@@ -132,6 +133,11 @@ const styles = StyleSheet.create({
     itemValor: {
         fontSize: 16,
         color: '#636e72'
+    },
+    itemButtons: {
+        marginLeft: 10,
+        justifyContent: 'space-between',
+        gap: 8
     },
     emptyText: {
         textAlign: 'center',
