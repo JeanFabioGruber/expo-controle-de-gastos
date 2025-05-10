@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, Text, StyleSheet, View, FlatList, Alert } from "react-native";
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Alert, TouchableOpacity } from "react-native";
 import { db } from '../firebase';
 import { DangerButton, PrimaryButton, SecondaryButton } from "../components/Buttons";
 import { CustomTextInput } from "../components/CustomInputs";
@@ -7,6 +7,7 @@ import { collection, addDoc, getDocs, query, where, updateDoc, doc, deleteDoc } 
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen () {
     const [user, setUser] = useState(null);
@@ -15,7 +16,6 @@ export default function HomeScreen () {
     const [data, setData] = useState('');
     const [list, setList] = useState([]);
     const [editId, setEditId] = useState(null);
-   
 
     const navigation = useNavigation();
 
@@ -125,14 +125,19 @@ export default function HomeScreen () {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f6fa' }}>
-            <View style={styles.container}>
+            <View style={styles.headerWrapper}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>Controle de Gastos</Text>                    
-                        <SecondaryButton
-                            text="Minha Conta"
-                            action={() => navigation.navigate('MinhaConta')}
-                        />   
+                    <Text style={styles.title}>Controle de Gastos</Text>
+                    <TouchableOpacity
+                        style={styles.profileIcon}
+                        onPress={() => navigation.navigate('MinhaConta')}
+                        accessibilityLabel="Minha Conta"
+                    >
+                        <Ionicons name="person-circle-outline" size={36} color="#1abc9c" />
+                    </TouchableOpacity>
                 </View>
+            </View>
+            <View style={styles.container}>
                 <Text style={styles.label}>Valor</Text>
                 <CustomTextInput
                     placeholder="Ex: 100.00"
@@ -145,37 +150,61 @@ export default function HomeScreen () {
                     placeholder="Ex: Supermercado"
                     value={descricao}
                     setValue={setDescricao}
-                />                
-                <PrimaryButton
-                    text={editId ? "Salvar Alterações" : "Adicionar Gasto"}
-                    action={addOrUpdate}
                 />
-                {editId && (
-                    <SecondaryButton text="Cancelar Edição" action={clearFields} />
-                )}
-                <Text style={styles.title}>Controle de Gastos</Text>
-                <View style={{ flexDirection: 'row', gap: 8 }}>                    
-                    <PrimaryButton
-                        text="Meus Gastos"
-                        action={() => navigation.navigate('Gastos')}
-                    />
+                <Text style={styles.label}>Data</Text>
+                <CustomTextInput
+                    placeholder="Ex: 2024-06-01"
+                    value={data}
+                    setValue={setData}
+                />
+                <View style={styles.formButtons}>
+                    <View style={{ flex: 1 }}>
+                        <PrimaryButton
+                            text={editId ? "Salvar Alterações" : "Adicionar Gasto"}
+                            action={addOrUpdate}
+                        />
+                    </View>
+                    {editId && (
+                        <View style={{ flex: 1 }}>
+                            <SecondaryButton text="Cancelar Edição" action={clearFields} />
+                        </View>
+                    )}
                 </View>
+                <SecondaryButton
+                    text="Meus Gastos"
+                    action={() => navigation.navigate('Gastos')}
+                />
             </View>
         </SafeAreaView>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 25,
+    headerWrapper: {
+        backgroundColor: '#f5f6fa',
         paddingTop: 20,
+        paddingBottom: 10,
+        paddingHorizontal: 0,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 10,
+        paddingHorizontal: 25,
+    },
+    profileIcon: {
+        minWidth: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    headerButton: {
+        minWidth: 120,
+        alignItems: 'flex-end',
+    },
+    container: {
+        flex: 1,
+        paddingHorizontal: 25,
+        paddingTop: 10,
     },
     title: {
         fontSize: 32,
@@ -195,6 +224,13 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 2,
         marginLeft: 2
+    },
+    formButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 10,
+        marginBottom: 10,
     },
     itemContainer: {
         backgroundColor: '#fff',
