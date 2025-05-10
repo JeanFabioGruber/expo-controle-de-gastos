@@ -15,6 +15,7 @@ export default function HomeScreen () {
     const [data, setData] = useState('');
     const [list, setList] = useState([]);
     const [editId, setEditId] = useState(null);
+   
 
     const navigation = useNavigation();
 
@@ -108,7 +109,6 @@ export default function HomeScreen () {
             ]
         );
     }
-
     const renderItem = ({ item }) => (
         <View style={styles.itemContainer}>
             <View style={{ flex: 1 }}>
@@ -127,11 +127,11 @@ export default function HomeScreen () {
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f6fa' }}>
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>Controle de Gastos</Text>
-                    <SecondaryButton
-                        text="Minha Conta"
-                        action={() => navigation.navigate('MinhaConta')}
-                    />
+                    <Text style={styles.title}>Controle de Gastos</Text>                    
+                        <SecondaryButton
+                            text="Minha Conta"
+                            action={() => navigation.navigate('MinhaConta')}
+                        />   
                 </View>
                 <Text style={styles.label}>Valor</Text>
                 <CustomTextInput
@@ -145,13 +145,7 @@ export default function HomeScreen () {
                     placeholder="Ex: Supermercado"
                     value={descricao}
                     setValue={setDescricao}
-                />
-                <Text style={styles.label}>Data</Text>
-                <CustomTextInput
-                    placeholder="Ex: 2025-05-10"
-                    value={data}
-                    setValue={setData}
-                />
+                />                
                 <PrimaryButton
                     text={editId ? "Salvar Alterações" : "Adicionar Gasto"}
                     action={addOrUpdate}
@@ -159,14 +153,13 @@ export default function HomeScreen () {
                 {editId && (
                     <SecondaryButton text="Cancelar Edição" action={clearFields} />
                 )}
-                <Text style={styles.subtitle}>Seus Gastos</Text>
-                <FlatList
-                    data={list}
-                    keyExtractor={item => item.id}
-                    renderItem={renderItem}
-                    ListEmptyComponent={<Text style={styles.emptyText}>Nenhum gasto cadastrado.</Text>}
-                    style={{ marginTop: 10 }}
-                />
+                <Text style={styles.title}>Controle de Gastos</Text>
+                <View style={{ flexDirection: 'row', gap: 8 }}>                    
+                    <PrimaryButton
+                        text="Meus Gastos"
+                        action={() => navigation.navigate('Gastos')}
+                    />
+                </View>
             </View>
         </SafeAreaView>
     )

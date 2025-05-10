@@ -1,0 +1,141 @@
+import React, { useEffect, useState } from "react";
+import { SafeAreaView, Text, StyleSheet, View, SectionList, ActivityIndicator } from "react-native";
+import { db } from '../firebase';
+import { SecondaryButton, DangerButton } from "../components/Buttons";
+import { collection, getDocs, query, where, doc, deleteDoc } from "firebase/firestore";
+import { auth } from "../firebase";
+import { useNavigation } from '@react-navigation/native';
+
+export default function GastosScreen() {
+    const [user, setUser] = useState(auth.currentUser);
+    const [sections, setSections] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const navigation = useNavigation();
+
+    const loadRecords = async () => {
+        if (!user) return;
+        setLoading(true);
+        const snapshot = await getDocs(
+            query(
+                collection(db, 'records'),
+                where('user_id', '==', user.uid)
+            )
+        );
+        const records = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        // Agrupa por data (YYYY-MM-DD)
+        const grouped = {};
+        records.forEach(item => {
+            const date = item.data;
+            if (!grouped[date]) grouped[date] = [];
+            grouped[date].push(item);
+        });
+
+        // Ordena as datas (decrescente) e os itens de cada data
+        const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+        const sectionsData = sortedDates.map(date => ({
+            title: date,
+            data: grouped[date].sort((a, b) => b.valor - a.valor)
+        }));
+
+        setSections(sectionsData);
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        loadRecords();
+    }, []);
+
+    const remove = async (id) => {
+        await deleteDoc(doc(db, 'records', id));
+        loadRecords();
+    };
+
+    const renderItem = ({ item }) => (
+        <View style={styles.itemContainer}>
+            <View style={{ flex: 1 }}>
+                <Text style={styles.itemDescricao}>{item.descricao}</Text>
+                <Text style={styles.itemValor}>R$ {item.valor}</Text>
+            </View>
+            <DangerButton text="Excluir" action={() => remove(item.id)} />
+        </View>
+    );
+
+    if (loading) {
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: 'center' }}>
+                <ActivityIndicator size="large" />
+            </SafeAreaView>
+        );
+    }
+
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f6fa' }}>
+            <View style={styles.container}>
+                <Text style={styles.title}>Meus Gastos</Text>
+                <SectionList
+                    sections={sections}
+                    keyExtractor={item => item.id}
+                    renderItem={renderItem}
+                    renderSectionHeader={({ section: { title } }) => (
+                        <Text style={styles.sectionHeader}>{title}</Text>
+                    )}
+                    ListEmptyComponent={<Text style={styles.emptyText}>Nenhum gasto cadastrado.</Text>}
+                />
+                <SecondaryButton text="Voltar" action={() => navigation.goBack()} />
+            </View>
+        </SafeAreaView>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingHorizontal: 25,
+        paddingTop: 20,
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#1abc9c',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    sectionHeader: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        backgroundColor: '#dff9fb',
+        color: '#636e72',
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        marginTop: 15,
+    },
+    itemContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 15,
+        marginBottom: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        elevation: 2
+    },
+    itemDescricao: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#1abc9c'
+    },
+    itemValor: {
+        fontSize: 16,
+        color: '#636e72'
+    },
+    emptyText: {
+        textAlign: 'center',
+        color: '#b2bec3',
+        marginTop: 30
+    }
+});
