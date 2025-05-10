@@ -171,20 +171,20 @@ export default function HomeScreen () {
             <View style={styles.container}>
                 <Text style={styles.label}>Valor</Text>
                 <CustomTextInput
-                    placeholder="Ex: 100,00"
+                    placeholder="Valor"
                     value={valor}
                     setValue={text => setValor(formatMoney(text))}
                     keyboardType="numeric"
                 />
                 <Text style={styles.label}>Descrição</Text>
                 <CustomTextInput
-                    placeholder="Ex: Supermercado"
+                    placeholder="Descrição"
                     value={descricao}
                     setValue={setDescricao}
                 />
                 <Text style={styles.label}>Data</Text>
                 <CustomTextInput
-                    placeholder="Ex: 12-03-2004"
+                    placeholder="Apenas números (DDMMAAAA)"
                     value={data}
                     setValue={text => setData(formatDateInput(text))}
                     keyboardType="numeric"
