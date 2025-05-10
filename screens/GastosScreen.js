@@ -10,6 +10,7 @@ export default function GastosScreen() {
     const [user, setUser] = useState(auth.currentUser);
     const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [total, setTotal] = useState(0); // Novo estado para o total
 
     const navigation = useNavigation();
 
@@ -26,6 +27,11 @@ export default function GastosScreen() {
             id: doc.id,
             ...doc.data()
         }));       
+
+        // Calcular o total dos gastos
+        const totalValue = expenses.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+        setTotal(totalValue);
+
         const grouped = {};
         expenses.forEach(item => {
             const date = item.data;
@@ -78,6 +84,7 @@ export default function GastosScreen() {
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f6fa' }}>
             <View style={styles.container}>
                 <Text style={styles.title}>Meus Gastos</Text>
+                <Text style={styles.totalText}>Total: R$ {total.toFixed(2)}</Text>
                 <SectionList
                     sections={sections}
                     keyExtractor={item => item.id}
@@ -104,7 +111,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#1abc9c',
         textAlign: 'center',
-        marginBottom: 20,
+        marginBottom: 10,
+    },
+    totalText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#0984e3',
+        textAlign: 'center',
+        marginBottom: 10,
     },
     sectionHeader: {
         fontSize: 20,
