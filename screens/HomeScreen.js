@@ -17,6 +17,17 @@ function formatMoney(value) {
     v = v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     return v;
 }
+function formatDateInput(text) {
+    let cleaned = text.replace(/\D/g, '');
+    cleaned = cleaned.slice(0, 8);
+    if (cleaned.length >= 5) {
+        return cleaned.replace(/(\d{2})(\d{2})(\d{0,4})/, '$1-$2-$3');
+    } else if (cleaned.length >= 3) {
+        return cleaned.replace(/(\d{2})(\d{0,2})/, '$1-$2');
+    } else {
+        return cleaned;
+    }
+}
 
 export default function HomeScreen () {
     const [user, setUser] = useState(null);
@@ -173,9 +184,10 @@ export default function HomeScreen () {
                 />
                 <Text style={styles.label}>Data</Text>
                 <CustomTextInput
-                    placeholder="Ex: 2024-06-01"
+                    placeholder="Ex: 12-03-2004"
                     value={data}
-                    setValue={setData}
+                    setValue={text => setData(formatDateInput(text))}
+                    keyboardType="numeric"
                 />
                 <View style={styles.formButtons}>
                     <View style={{ flex: 1 }}>
@@ -283,4 +295,4 @@ const styles = StyleSheet.create({
         color: '#b2bec3',
         marginTop: 30
     }
-});
+});1221
