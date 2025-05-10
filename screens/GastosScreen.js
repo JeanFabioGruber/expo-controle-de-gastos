@@ -13,21 +13,21 @@ export default function GastosScreen() {
 
     const navigation = useNavigation();
 
-    const loadRecords = async () => {
+    const loadexpenses = async () => {
         if (!user) return;
         setLoading(true);
         const snapshot = await getDocs(
             query(
-                collection(db, 'records'),
+                collection(db, 'expenses'),
                 where('user_id', '==', user.uid)
             )
         );
-        const records = snapshot.docs.map((doc) => ({
+        const expenses = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data()
         }));       
         const grouped = {};
-        records.forEach(item => {
+        expenses.forEach(item => {
             const date = item.data;
             if (!grouped[date]) grouped[date] = [];
             grouped[date].push(item);
@@ -42,12 +42,12 @@ export default function GastosScreen() {
     };
 
     useEffect(() => {
-        loadRecords();
+        loadexpenses();
     }, []);
 
     const remove = async (id) => {
-        await deleteDoc(doc(db, 'records', id));
-        loadRecords();
+        await deleteDoc(doc(db, 'expenses', id));
+        loadexpenses();
     };
     const edit = (item) => {
         navigation.navigate('Home', { editItem: item });

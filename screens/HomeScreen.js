@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { SafeAreaView, Text, StyleSheet, View, FlatList, Alert, TouchableOpacity } from "react-native";
 import { db } from '../firebase';
 import { DangerButton, PrimaryButton, SecondaryButton } from "../components/Buttons";
@@ -36,24 +36,24 @@ export default function HomeScreen () {
         }
     }, [route.params]);
 
-    const loadRecords = async () => {
+    const loadexpenses = async () => {
         if (!user) return;
         const snapshot = await getDocs(
             query(
-                collection(db, 'records'),
+                collection(db, 'expenses'),
                 where('user_id', '==', user.uid)
             )
         );
-        const records = snapshot.docs.map((doc) => ({
+        const expenses = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data()
         }));
-        setList(records);
+        setList(expenses);
     }
 
     useEffect(() => {
         if (!user) return;
-        loadRecords();
+        loadexpenses();
     }, [user]);
 
     const clearFields = () => {
@@ -74,20 +74,20 @@ export default function HomeScreen () {
         }
         try {
             if (editId) {
-                await updateDoc(doc(db, 'records', editId), {
+                await updateDoc(doc(db, 'expenses', editId), {
                     valor: parseFloat(valor),
                     descricao,
                     data
                 });
             } else {
-                await addDoc(collection(db, 'records'), {
+                await addDoc(collection(db, 'expenses'), {
                     valor: parseFloat(valor),
                     descricao,
                     data,
                     user_id: user.uid
                 });
             }
-            loadRecords();
+            loadexpenses();
             clearFields();
         } catch (e) {
             console.log('Erro ao salvar:', e);
@@ -112,8 +112,8 @@ export default function HomeScreen () {
                     text: "Remover",
                     style: "destructive",
                     onPress: async () => {
-                        await deleteDoc(doc(db, 'records', id));
-                        loadRecords();
+                        await deleteDoc(doc(db, 'expenses', id));
+                        loadexpenses();
                     }
                 }
             ]
