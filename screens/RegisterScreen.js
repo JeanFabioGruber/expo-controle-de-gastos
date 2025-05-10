@@ -8,8 +8,10 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import {
     auth,
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword,
+    db
 } from '../firebase';
+import { doc, setDoc } from "firebase/firestore";
 import { PrimaryButton, SecondaryButton } from '../components/Buttons';
 import { EmailInput, PasswordInput } from '../components/CustomInputs';
 
@@ -22,12 +24,13 @@ export default function RegisterScreen () {
 
     const [ email, setEmail ] = useState('');
     const [ password, setPassword ] = useState('');
-
+    const [ nome, setNome ] = useState('');
+    const [ telefone, setTelefone ] = useState('');
     const [ errorMessage, setErrorMessage ] = useState('');
 
     const register = async () => {
-        if (!email || !password) {
-            setErrorMessage('Informe o e-mail e senha.');
+        if (!nome || !telefone || !email || !password) {
+            setErrorMessage('Preencha todos os campos.');
             return;
         }
 
@@ -43,36 +46,49 @@ export default function RegisterScreen () {
 
         setErrorMessage('');
 
-        createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            console.log('Usuário: ', user);
-        })
-        .catch((error) => {
+            await setDoc(doc(db, "users", user.uid), {
+                nome: nome,
+                telefone: telefone,
+                email: user.email
+            });
+            navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+        } catch (error) {
             setErrorMessage(error.message);
-        })
-       
+        }
     }
 
     useEffect(() => {
         setErrorMessage('');
-    }, [email, password])
+    }, [email, password, nome, telefone])
 
     return (
         <SafeAreaView>
             <View style={styles.container}>
                 <Text style={styles.title}>Registrar-se</Text>
-                <EmailInput value={email} setValue={setEmail} />                
+                <Text style={styles.label}>Nome</Text>
+                <EmailInput
+                    placeholder="Digite seu nome"
+                    value={nome}
+                    setValue={setNome}
+                />
+                <Text style={styles.label}>Telefone</Text>
+                <EmailInput
+                    placeholder="Digite seu telefone"
+                    value={telefone}
+                    setValue={setTelefone}
+                    keyboardType="phone-pad"
+                />
+                <EmailInput value={email} setValue={setEmail} />
                 <PasswordInput value={password} setValue={setPassword} />
                 {errorMessage &&
                     <Text style={styles.errorMessage}>{errorMessage}</Text>
                 }
-                <PrimaryButton text={"Registrar-se"} action={() => {
-                    register();
-                }} />
+                <PrimaryButton text={"Registrar-se"} action={register} />
 
                 <Text>Já tem uma conta?</Text>
-                
                 <SecondaryButton text={'Voltar para Login'} action={() => {
                     navigation.goBack();
                 }} />
@@ -90,9 +106,15 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginVertical: 40
     },
+    label: {
+        fontSize: 16,
+        marginTop: 10,
+        marginBottom: 2,
+        marginLeft: 2
+    },
     errorMessage: {
         fontSize: 18,
         textAlign: 'center',
         color: 'red'
     }
-})
+});

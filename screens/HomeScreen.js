@@ -1,33 +1,29 @@
-import { SafeAreaView, Text, StyleSheet, View, FlatList, TouchableOpacity, Alert } from "react-native";
-import { auth, signOut, db } from '../firebase';
+import React, { useState, useEffect } from "react";
+import { SafeAreaView, Text, StyleSheet, View, FlatList, Alert } from "react-native";
+import { db } from '../firebase';
 import { DangerButton, PrimaryButton, SecondaryButton } from "../components/Buttons";
 import { CustomTextInput } from "../components/CustomInputs";
-import { useState, useEffect } from "react";
 import { collection, addDoc, getDocs, query, where, updateDoc, doc, deleteDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase";
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen () {
-
     const [user, setUser] = useState(null);
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-        });
-
-        return unsubscribe;
-    }, []);
-
-    const logout = async () => {
-        await signOut(auth);
-    }
-
-    // Estados para os campos do gasto
     const [valor, setValor] = useState('');
     const [descricao, setDescricao] = useState('');
     const [data, setData] = useState('');
     const [list, setList] = useState([]);
     const [editId, setEditId] = useState(null);
+
+    const navigation = useNavigation();
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+        return unsubscribe;
+    }, []);
 
     const loadRecords = async () => {
         if (!user) return;
@@ -41,7 +37,6 @@ export default function HomeScreen () {
             id: doc.id,
             ...doc.data()
         }));
-
         setList(records);
     }
 
@@ -58,6 +53,14 @@ export default function HomeScreen () {
     }
 
     const addOrUpdate = async () => {
+        if (!user) {
+            Alert.alert('Usuário não autenticado.');
+            return;
+        }
+        if (!valor || !descricao || !data) {
+            Alert.alert('Preencha todos os campos.');
+            return;
+        }
         try {
             if (editId) {
                 await updateDoc(doc(db, 'records', editId), {
@@ -82,7 +85,7 @@ export default function HomeScreen () {
     }
 
     const startEdit = (item) => {
-        setValor(item.valor);
+        setValor(String(item.valor));
         setDescricao(item.descricao);
         setData(item.data);
         setEditId(item.id);
@@ -123,9 +126,13 @@ export default function HomeScreen () {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f6fa' }}>
             <View style={styles.container}>
-                <Text style={styles.title}>Controle de Gastos</Text>
-                <DangerButton text={'Desconectar'} action={logout} />
-
+                <View style={styles.header}>
+                    <Text style={styles.title}>Controle de Gastos</Text>
+                    <SecondaryButton
+                        text="Minha Conta"
+                        action={() => navigation.navigate('MinhaConta')}
+                    />
+                </View>
                 <Text style={styles.label}>Valor</Text>
                 <CustomTextInput
                     placeholder="Ex: 100.00"
@@ -145,7 +152,6 @@ export default function HomeScreen () {
                     value={data}
                     setValue={setData}
                 />
-
                 <PrimaryButton
                     text={editId ? "Salvar Alterações" : "Adicionar Gasto"}
                     action={addOrUpdate}
@@ -153,7 +159,6 @@ export default function HomeScreen () {
                 {editId && (
                     <SecondaryButton text="Cancelar Edição" action={clearFields} />
                 )}
-
                 <Text style={styles.subtitle}>Seus Gastos</Text>
                 <FlatList
                     data={list}
@@ -173,10 +178,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 25,
         paddingTop: 20,
     },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
     title: {
         fontSize: 32,
-        textAlign: 'center',
-        marginBottom: 10,
         fontWeight: 'bold',
         color: '#1abc9c'
     },
