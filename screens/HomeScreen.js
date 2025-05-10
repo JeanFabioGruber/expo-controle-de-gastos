@@ -6,8 +6,17 @@ import { CustomTextInput } from "../components/CustomInputs";
 import { collection, addDoc, getDocs, query, where, updateDoc, doc, deleteDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
-import { useNavigation, useRoute } from '@react-navigation/native'; // <-- adicione useRoute
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+
+function formatMoney(value) {
+    let v = value.replace(/\D/g, '');
+    if (!v) return '';
+    v = (parseInt(v, 10) / 100).toFixed(2) + '';
+    v = v.replace('.', ',');
+    v = v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return v;
+}
 
 export default function HomeScreen () {
     const [user, setUser] = useState(null);
@@ -28,7 +37,7 @@ export default function HomeScreen () {
     useEffect(() => {
         if (route.params && route.params.editItem) {
             const { valor, descricao, data, id } = route.params.editItem;
-            setValor(String(valor));
+            setValor(formatMoney(String(valor)));
             setDescricao(descricao);
             setData(data);
             setEditId(id);            
@@ -72,16 +81,17 @@ export default function HomeScreen () {
             Alert.alert('Preencha todos os campos.');
             return;
         }
-        try {
+        try {           
+            const valorNumber = parseFloat(valor.replace(/\./g, '').replace(',', '.'));
             if (editId) {
                 await updateDoc(doc(db, 'expenses', editId), {
-                    valor: parseFloat(valor),
+                    valor: valorNumber,
                     descricao,
                     data
                 });
             } else {
                 await addDoc(collection(db, 'expenses'), {
-                    valor: parseFloat(valor),
+                    valor: valorNumber,
                     descricao,
                     data,
                     user_id: user.uid
@@ -96,7 +106,7 @@ export default function HomeScreen () {
     }
 
     const startEdit = (item) => {
-        setValor(String(item.valor));
+        setValor(formatMoney(String(item.valor)));
         setDescricao(item.descricao);
         setData(item.data);
         setEditId(item.id);
@@ -123,7 +133,7 @@ export default function HomeScreen () {
         <View style={styles.itemContainer}>
             <View style={{ flex: 1 }}>
                 <Text style={styles.itemDescricao}>{item.descricao}</Text>
-                <Text style={styles.itemValor}>R$ {item.valor}</Text>
+                <Text style={styles.itemValor}>R$ {formatMoney(String(item.valor))}</Text>
                 <Text style={styles.itemData}>{item.data}</Text>
             </View>
             <View style={styles.itemButtons}>
@@ -150,9 +160,9 @@ export default function HomeScreen () {
             <View style={styles.container}>
                 <Text style={styles.label}>Valor</Text>
                 <CustomTextInput
-                    placeholder="Ex: 100.00"
+                    placeholder="Ex: 100,00"
                     value={valor}
-                    setValue={setValor}
+                    setValue={text => setValor(formatMoney(text))}
                     keyboardType="numeric"
                 />
                 <Text style={styles.label}>Descrição</Text>
