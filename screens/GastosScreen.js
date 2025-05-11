@@ -10,7 +10,7 @@ export default function GastosScreen() {
     const [user, setUser] = useState(auth.currentUser);
     const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [total, setTotal] = useState(0); // Novo estado para o total
+    const [total, setTotal] = useState(0);
 
     const navigation = useNavigation();
 
@@ -26,9 +26,8 @@ export default function GastosScreen() {
         const expenses = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data()
-        }));       
+        }));
 
-        // Calcular o total dos gastos
         const totalValue = expenses.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
         setTotal(totalValue);
 
@@ -37,7 +36,7 @@ export default function GastosScreen() {
             const date = item.data;
             if (!grouped[date]) grouped[date] = [];
             grouped[date].push(item);
-        });       
+        });
         const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
         const sectionsData = sortedDates.map(date => ({
             title: date,
@@ -66,8 +65,8 @@ export default function GastosScreen() {
                 <Text style={styles.itemValor}>R$ {item.valor}</Text>
             </View>
             <View style={styles.itemButtons}>
-                <PrimaryButton text="Editar" action={() => edit(item)} />
-                <DangerButton text="Excluir" action={() => remove(item.id)} />
+                <PrimaryButton text="Editar" action={() => edit(item)} style={styles.smallButton} />
+                <DangerButton text="Excluir" action={() => remove(item.id)} style={styles.smallButton} />
             </View>
         </View>
     );
@@ -103,7 +102,7 @@ export default function GastosScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 25,
+        paddingHorizontal: 20,
         paddingTop: 20,
     },
     title: {
@@ -114,44 +113,55 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     totalText: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#0984e3',
         textAlign: 'center',
         marginBottom: 10,
     },
     sectionHeader: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
         backgroundColor: '#dff9fb',
         color: '#636e72',
-        paddingVertical: 8,
+        paddingVertical: 6,
         paddingHorizontal: 10,
         borderRadius: 8,
         marginTop: 15,
     },
     itemContainer: {
         backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 15,
-        marginBottom: 12,
+        borderRadius: 14,
+        padding: 18,
+        marginBottom: 10,
         flexDirection: 'row',
         alignItems: 'center',
-        elevation: 2
+        elevation: 2,
+        shadowColor: '#b2bec3',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     itemDescricao: {
-        fontSize: 18,
+        fontSize: 22,
         fontWeight: 'bold',
-        color: '#1abc9c'
+        color: '#1abc9c',
+        marginBottom: 4,
     },
     itemValor: {
-        fontSize: 16,
-        color: '#636e72'
+        fontSize: 20,
+        color: '#636e72',
+        fontWeight: '600',
     },
     itemButtons: {
-        marginLeft: 10,
-        justifyContent: 'space-between',
-        gap: 8
+        marginLeft: 12,
+        justifyContent: 'center',
+        gap: 8,
+    },
+    smallButton: {
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        minWidth: 70,
     },
     emptyText: {
         textAlign: 'center',

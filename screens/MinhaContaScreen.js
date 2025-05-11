@@ -25,8 +25,7 @@ export default function MinhaContaScreen({ navigation }) {
     }, []);
 
     const logout = async () => {
-        await signOut(auth);
-        navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+        await signOut(auth);      
     };
 
     if (!user) return null;
