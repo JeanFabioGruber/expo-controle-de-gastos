@@ -37,9 +37,9 @@ export function DangerButton ({ action, text }) {
 const styles = StyleSheet.create({
     button: {
         padding: 18,
-        borderRadius: 30, // mais arredondado
+        borderRadius: 30, 
         marginVertical: 15,
-        elevation: 3, // sombra leve
+        elevation: 3,
     },
     buttonText: {
         color: 'white',
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
     },
     primaryButton: {
-        backgroundColor: '#1abc9c', // nova cor
+        backgroundColor: '#1abc9c', 
     },
     secondaryButton: {
         borderColor: '#1abc9c',

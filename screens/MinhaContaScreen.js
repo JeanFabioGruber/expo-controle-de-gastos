@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SafeAreaView, View, Text, StyleSheet } from 'react-native';
 import { auth, signOut, db } from '../firebase';
 import { DangerButton, SecondaryButton } from '../components/Buttons';
